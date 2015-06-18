@@ -7,14 +7,14 @@ ENV T3APP_BUILD_BRANCH master
 
 # ENV: Repository for installed TYPO3 app
 # Default: git://git.typo3.org/Flow/Distributions/Base.git
-ENV T3APP_BUILD_REPO_URL git@github.com:cron-eu/neos-playground.git
+ENV T3APP_BUILD_REPO_URL https://github.com/cron-eu/neos-playground.git
 
 # ENV: Custom composer install params
 # Default: --dev --prefer-source
 ENV T3APP_BUILD_COMPOSER_PARAMS --no-dev --prefer-dist --optimize-autoloader
 
 # ENV: Import following site package
-#ENV T3APP_NEOS_SITE_PACKAGE CRON.Playground
+ENV T3APP_NEOS_SITE_PACKAGE CRON.Playground
 
 # change the PHP timezone to Europe/Berlin
 RUN echo "date.timezone = Europe/Berlin" >> /etc/php.d/zz-php.ini
