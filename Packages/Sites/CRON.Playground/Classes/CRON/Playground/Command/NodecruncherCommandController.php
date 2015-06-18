@@ -60,7 +60,7 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 
 	private function generateRandomPageInNode(NodeInterface $node) {
 
-		$title = \TYPO3\Faker\Lorem::sentence();
+		$title = \TYPO3\Faker\Lorem::sentence(2);
 		$node = $node->createNode(
 			$this->nodeNameGenerator->generateUniqueNodeName($node, $title),
 			$this->nodeTypeManager->getNodeType('TYPO3.Neos.NodeTypes:Page')
@@ -102,6 +102,7 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 		} else {
 			// reuse the page, but purge old data..
 			/** @var NodeInterface $childNode */
+			$this->outputLine('Deleting old stuff..');
 			foreach ($testNode->getChildNodes('TYPO3.Neos:Document') as $childNode) {
 				$childNode->remove();
 			}
@@ -113,6 +114,7 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 		for ($i=0;$i<$count;$i++) {
 			$this->generateRandomPageInNode($testNode);
 			$this->output->progressAdvance();
+			$this->nodeDataRepository->persistEntities();
 		}
 		$this->output->progressFinish();
 
