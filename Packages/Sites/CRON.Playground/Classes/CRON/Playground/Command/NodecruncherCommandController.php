@@ -82,7 +82,9 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 			}
 		}
 
-		$this->outputLine('Nodecruncher in action, creating %d documents..', [$count]);
+		$this->outputLine('Nodecruncher in action, creating %d documents using batch size of %d',
+			[$count, $batchSize]);
+
 		$this->reportMemoryUsage();
 
 		$this->output->progressStart($count);
@@ -95,12 +97,11 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 			$this->reportMemoryUsage();
 
 			if ($i && $i % $batchSize == 0) {
-				$this->objectManager->forgetInstance('CRON\Playground\DocumentGenerator');
-				$documentGenerator = $this->objectManager->get('CRON\Playground\DocumentGenerator');
-				$this->outputLine('clearState()');
 				$this->persistenceManager->persistAll();
 				$this->persistenceManager->clearState();
-				$this->reportMemoryUsage();
+				$this->contextFactory->reset();
+				$this->objectManager->forgetInstance('CRON\Playground\DocumentGenerator');
+				$documentGenerator = $this->objectManager->get('CRON\Playground\DocumentGenerator');
 			}
 
 		}
