@@ -1,12 +1,12 @@
-TYPO3 Neos Docker Environment for DAV DAZ
-=========================================
+TYPO3 Neos 2.0 Docker Env
+=========================
 
 Abstract
 --------
 
 This is a docker based dev environment for:
 
-https://github.com/cron-eu/daz-neos-base/tree/develop
+https://github.com/cron-eu/neos-playground/tree/develop
 
 The web-container is using the boilerplate from million12
 
@@ -24,23 +24,9 @@ The needed container will be build using the latest codebase from the develop br
 ```
 DIR=$HOME/Developer/Docker
 mkdir -p $DIR && cd $DIR || exit 1
-git clone --depth=1 git@github.com:cron-eu/daz-neos-base.git -b docker dav-daz
-cd dav-daz
+git clone --depth=1 git@github.com:cron-eu/neos-playground.git -b docker neos-playground
+cd neos-playground
 vi docker-compose.yml # put you github user name and other tweaks (ports, vhost names, branch etc.)
-docker-compose up -d
-```
-
-### Upgrade Instructions
-
-You can upgrade your existing Docker env using this steps:
-
-```
-cd $HOME/Developer/Docker/dav-daz
-git pull origin docker
-docker-compose stop
-docker-compose rm -v
-docker rmi davdaz_db davdaz_elasticsearch davdaz_web
-docker-compose build
 docker-compose up -d
 ```
 
@@ -58,14 +44,14 @@ then proceed with the regular setup.
 ### Stop the dev env
 
 ```
-cd $HOME/Developer/Docker/dav-daz
+cd $HOME/Developer/Docker/neos-playground
 docker-compose stop
 ```
 
 ### Start the dev env
 
 ```
-cd $HOME/Developer/Docker/dav-daz
+cd $HOME/Developer/Docker/neos-playground
 docker-compose up -d
 ```
 
@@ -74,7 +60,7 @@ docker-compose up -d
 .. and purge all data
 
 ```
-cd $HOME/Developer/Docker/dav-daz
+cd $HOME/Developer/Docker/neos-playground
 docker-compose stop
 docker-compose rm -v
 ```
@@ -92,7 +78,7 @@ rsync -av --exclude /Packages/Sites/CRON.DazSite/Resources/Public/ \
   --exclude /Packages/Sites/CRON.DazSite/layout/ \
   --exclude /Data \
   --exclude /Web/_Resources \
-  -e "ssh -p 1122" www@$(boot2docker ip):typo3-app/ dav-daz
+  -e "ssh -p 1122" www@$(boot2docker ip):typo3-app/ neos-playground
 ```
 
 You will end up having a shadow copy of your app directory locally.
@@ -116,7 +102,7 @@ Mappings
 
 Check that "Test SFTP Connection" is OK.
 
-Then open the project from the path `~/Developer/cron/PhpStormProjects/dav-daz` and you're ready to go.
+Then open the project from the path `~/Developer/cron/PhpStormProjects/neos-playground` and you're ready to go.
 
 Caveats
 -------
