@@ -8,7 +8,6 @@ namespace CRON\Playground\Command;
 
 use CRON\Playground\DocumentGenerator;
 use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Object\ObjectManagerInterface;
 use TYPO3\TYPO3CR\Domain\Model\NodeInterface;
 use TYPO3\TYPO3CR\Domain\Service\NodeTypeManager;
 
@@ -18,12 +17,6 @@ use TYPO3\TYPO3CR\Domain\Service\NodeTypeManager;
 class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 
 	const TEST_NODE_NAME = 'test';
-
-	/**
-	 * @Flow\Inject
-	 * @var ObjectManagerInterface
-	 */
-	protected $objectManager;
 
 	/**
 	 * @Flow\Inject
@@ -63,7 +56,7 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$this->reportMemoryUsage();
 
 		/** @var DocumentGenerator $documentGenerator */
-		$documentGenerator = $this->objectManager->get('CRON\Playground\DocumentGenerator');
+		$documentGenerator = new DocumentGenerator();
 
 		$rootNode = $this->contextFactory->create()->getNode('/sites/playground');
 		$testNode = $rootNode->getNode(self::TEST_NODE_NAME);
@@ -95,13 +88,12 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 			$this->output->progressAdvance();
 
 			$this->reportMemoryUsage();
+			$this->persistenceManager->persistAll();
 
 			if ($i && $i % $batchSize == 0) {
-				$this->persistenceManager->persistAll();
 				$this->persistenceManager->clearState();
 				$this->contextFactory->reset();
-				$this->objectManager->forgetInstance('CRON\Playground\DocumentGenerator');
-				$documentGenerator = $this->objectManager->get('CRON\Playground\DocumentGenerator');
+				$documentGenerator = new DocumentGenerator();
 			}
 
 		}
