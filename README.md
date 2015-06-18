@@ -74,11 +74,7 @@ Copy the app dir incl. webroot locally
 DIR=$HOME/Developer/cron/PhpStormProjects
 mkdir -p "$DIR" && cd "$DIR"
 
-rsync -av --exclude /Packages/Sites/CRON.DazSite/Resources/Public/ \
-  --exclude /Packages/Sites/CRON.DazSite/layout/ \
-  --exclude /Data \
-  --exclude /Web/_Resources \
-  -e "ssh -p 1122" www@$(boot2docker ip):typo3-app/ neos-playground
+rsync -av --delete --exclude /Data --exclude /Web/_Resources -e "ssh -p 1122" www@$(boot2docker ip):typo3-app/ neos-playground
 ```
 
 You will end up having a shadow copy of your app directory locally.
