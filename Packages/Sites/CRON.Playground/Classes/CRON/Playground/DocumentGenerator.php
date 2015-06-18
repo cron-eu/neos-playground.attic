@@ -20,6 +20,7 @@ class DocumentGenerator  {
 	 * @return void
 	 */
 	public function initializeObject() {
+		$this->contextFactory->reset();
 		$this->context = $this->contextFactory->create();
 	}
 
@@ -51,10 +52,12 @@ class DocumentGenerator  {
 	/**
 	 * Generates a NEOS Page with some random Faker Content
 	 *
-	 * @param $path
+	 * @param string $path
+	 * @param int $count
+	 * @return \TYPO3\TYPO3CR\Domain\Model\NodeInterface
 	 * @throws \TYPO3\TYPO3CR\Exception\NodeTypeNotFoundException
 	 */
-	public function generateFakerPage($path) {
+	public function generateFakerPage($path, $count) {
 
 		$node = $this->context->getNode($path);
 
@@ -68,7 +71,7 @@ class DocumentGenerator  {
 		$mainNode = $node->getNode('main');
 
 		// generate random text data in the main content collection
-		for ($i=0;$i<200;$i++) {
+		for ($i=0;$i<$count;$i++) {
 			$title = \TYPO3\Faker\Lorem::sentence();
 			$textNode = $mainNode->createNode(
 				$this->nodeNameGenerator->generateUniqueNodeName($node, $title),
@@ -77,7 +80,6 @@ class DocumentGenerator  {
 			$textNode->setProperty('title', $title);
 			$textNode->setProperty('text', $this->tag(\TYPO3\Faker\Lorem::paragraph(10)));
 		}
+		return $node;
 	}
-
-
 }

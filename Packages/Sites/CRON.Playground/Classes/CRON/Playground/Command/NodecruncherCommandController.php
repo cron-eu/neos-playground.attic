@@ -20,6 +20,12 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 
 	/**
 	 * @Flow\Inject
+	 * @var \TYPO3\TYPO3CR\Domain\Repository\NodeDataRepository
+	 */
+	protected $nodeDataRepository;
+
+	/**
+	 * @Flow\Inject
 	 * @var \TYPO3\TYPO3CR\Domain\Service\ContextFactoryInterface
 	 */
 	protected $contextFactory;
@@ -39,7 +45,7 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	protected $persistenceManager;
 
 	private function reportMemoryUsage() {
-		$this->outputLine(' > mem: %.1f MB', [memory_get_usage()/1024/1024]);
+		$this->outputLine(' > mem: %.1f MB', [memory_get_peak_usage()/1024/1024]);
 	}
 
 	/**
@@ -72,6 +78,7 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 			$this->outputLine('Deleting old stuff..');
 			foreach ($testNode->getChildNodes('TYPO3.Neos:Document') as $childNode) {
 				$childNode->remove();
+				$this->persistenceManager->persistAll();
 			}
 		}
 
@@ -83,18 +90,21 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$this->output->progressStart($count);
 		$path = $testNode->getPath();
 
+		$this->nodeTypeManager = null;
+		$this->contextFactory = null;
+
 		for ($i=0;$i<$count;$i++) {
-			$documentGenerator->generateFakerPage($path);
-			$this->output->progressAdvance();
 
-			$this->reportMemoryUsage();
-			$this->persistenceManager->persistAll();
-
-			if ($i && $i % $batchSize == 0) {
+			if ($i % $batchSize == 0) {
+				$this->persistenceManager->persistAll();
+				$documentGenerator = null;
 				$this->persistenceManager->clearState();
-				$this->contextFactory->reset();
 				$documentGenerator = new DocumentGenerator();
 			}
+
+			$documentGenerator->generateFakerPage($path, 10);
+			$this->output->progressAdvance();
+			$this->reportMemoryUsage();
 
 		}
 		$this->output->progressFinish();
