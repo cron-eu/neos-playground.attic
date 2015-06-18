@@ -5,7 +5,12 @@
 /Build/Resources
 /Configuration/
 /Data/
-/Packages/
+/Packages/Application
+/Packages/Framework
+/Packages/Libraries
+/Packages/Plugins
+/Packages/Sites/*
+!/Packages/Sites/CRON.Playground
 /Web/
 /bin/
 /Readme.txt
