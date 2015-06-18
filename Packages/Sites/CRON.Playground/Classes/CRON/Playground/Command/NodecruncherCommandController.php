@@ -21,6 +21,14 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	const TEST_NODE_NAME = 'test';
 
 	/**
+	 * Inject PersistenceManagerInterface
+	 *
+	 * @Flow\Inject
+	 * @var \TYPO3\Flow\Persistence\PersistenceManagerInterface
+	 */
+	protected $persistenceManager;
+
+	/**
 	 * @Flow\Inject
 	 * @var NodeDataRepository
 	 */
@@ -58,6 +66,13 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$this->context = $this->contextFactory->create();
 	}
 
+	private function tag($content, $tag = 'p') {
+		$xml = new \XMLWriter();
+		$xml->openMemory();
+		$xml->writeElement($tag, $content);
+		return $xml->outputMemory();
+	}
+
 	private function generateRandomPageInNode(NodeInterface $node) {
 
 		$title = \TYPO3\Faker\Lorem::sentence(2);
@@ -70,14 +85,14 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$mainNode = $node->getNode('main');
 
 		// generate random text data in the main content collection
-		for ($i=0;$i<100;$i++) {
+		for ($i=0;$i<200;$i++) {
 			$title = \TYPO3\Faker\Lorem::sentence();
 			$textNode = $mainNode->createNode(
 				$this->nodeNameGenerator->generateUniqueNodeName($node, $title),
 				$this->nodeTypeManager->getNodeType('TYPO3.Neos.NodeTypes:Text')
 			);
 			$textNode->setProperty('title', $title);
-			$textNode->setProperty('text', \TYPO3\Faker\Lorem::paragraph(30));
+			$textNode->setProperty('text', $this->tag(\TYPO3\Faker\Lorem::paragraph(10)));
 		}
 	}
 
@@ -114,7 +129,7 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 		for ($i=0;$i<$count;$i++) {
 			$this->generateRandomPageInNode($testNode);
 			$this->output->progressAdvance();
-			$this->nodeDataRepository->persistEntities();
+			$this->persistenceManager->persistAll();
 		}
 		$this->output->progressFinish();
 
