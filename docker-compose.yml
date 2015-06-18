@@ -1,0 +1,38 @@
+db:
+  image: mariadb:latest
+  ports:
+    - 3306
+  environment:
+    MARIADB_PASS: secret2311
+    MARIADB_USER: root
+    MYSQL_ROOT_PASSWORD: secret2311
+
+web:
+  build: ./web
+  ports:
+    - '8080:80'
+  links:
+    - db:db
+#    - elasticsearch:elasticsearch
+  environment:
+    T3APP_VHOST_NAMES: neos.boot2docker dev.neos.boot2docker behat.dev.neos.boot2docker
+    T3APP_DB_USER: root
+
+dev:
+  build: ./dev
+  ports:
+    - '1122:22'
+  links:
+    - db:db
+    - web:web
+#    - elasticsearch:elasticsearch
+  volumes_from:
+    - web
+  environment:
+    IMPORT_GITHUB_PUB_KEYS: remuslazar
+
+#elasticsearch:
+#  build: ./elasticsearch
+#  ports:
+#    - 9200
+#    - 9300
