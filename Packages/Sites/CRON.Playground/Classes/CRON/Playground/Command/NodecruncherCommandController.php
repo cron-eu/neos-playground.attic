@@ -96,6 +96,10 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 		}
 	}
 
+	private function reportMemoryUsage() {
+		$this->outputLine('mem: %.1f MB', [memory_get_usage()/1024/1024]);
+	}
+
 	/**
 	 * Create Nodes
 	 *
@@ -105,6 +109,9 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 * @return void
 	 */
 	public function createCommand($count) {
+
+		$this->reportMemoryUsage();
+
 		$rootNode = $this->context->getNode('/sites/'.$this->site->getName());
 
 		$testNode = $rootNode->getNode(self::TEST_NODE_NAME);
@@ -124,12 +131,16 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 		}
 
 		$this->outputLine('Nodecruncher in action, creating %d documents..', [$count]);
+		$this->reportMemoryUsage();
 
 		$this->output->progressStart($count);
 		for ($i=0;$i<$count;$i++) {
 			$this->generateRandomPageInNode($testNode);
 			$this->output->progressAdvance();
 			$this->persistenceManager->persistAll();
+			if ($i % 1 == 0) {
+				$this->reportMemoryUsage();
+			}
 		}
 		$this->output->progressFinish();
 
