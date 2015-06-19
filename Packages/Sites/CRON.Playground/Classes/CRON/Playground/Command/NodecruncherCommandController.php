@@ -16,7 +16,13 @@ use TYPO3\TYPO3CR\Domain\Service\NodeTypeManager;
  */
 class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 
-	const TEST_NODE_NAME = 'test';
+	const NODE_NAME = 'nodecruncher-test';
+
+	/**
+	 * @Flow\Inject
+	 * @var \TYPO3\Neos\Service\NodeNameGenerator
+	 */
+	protected $nodeNameGenerator;
 
 	/**
 	 * @Flow\Inject
@@ -50,9 +56,23 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 		}
 	}
 
-	private function getTestNode() {
+	/**
+	 * Gets the folder where we want to put our data in
+	 *
+	 * @param bool $create
+	 * @return \TYPO3\TYPO3CR\Domain\Model\Node|NodeInterface
+	 * @throws \TYPO3\TYPO3CR\Exception\NodeTypeNotFoundException
+	 */
+	private function getTestsuiteFolderNode($create=false) {
 		$rootNode = $this->contextFactory->create()->getNode('/sites/playground');
-		return $rootNode->getNode(self::TEST_NODE_NAME);
+		$node = $rootNode->getNode(self::NODE_NAME);
+		if (!$node && $create) {
+			$node = $rootNode->createNode(
+				self::NODE_NAME,
+				$this->nodeTypeManager->getNodeType('TYPO3.Neos.NodeTypes:Page')
+			);
+		}
+		return $node;
 	}
 
 	/**
@@ -62,28 +82,29 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 *
 	 * @param int $count number of nodes to create
 	 * @param int $batchSize batch size after a clearState() will be performed
+	 * @param string $page put generated pages in a page with this title
 	 * @param bool $purge purge old data
 	 * @param bool $verbose show memory usage after each iteration
 	 * @return void
 	 */
-	public function createCommand($count, $batchSize, $purge=false, $verbose=false) {
+	public function createCommand($count, $batchSize, $page=false, $purge='', $verbose=false) {
 
 		/** @var DocumentGenerator $documentGenerator */
 		$documentGenerator = new DocumentGenerator();
 
-		$testNode = $this->getTestNode();
+		$node = $this->getTestsuiteFolderNode(true);
 
-		if (!$testNode) {
-			$testNode = $rootNode->createNode(
-				self::TEST_NODE_NAME,
+		if ($purge) {
+			$this->purge($node);
+		}
+
+		if ($page) {
+			$node = $node->createNode(
+				$this->nodeNameGenerator->generateUniqueNodeName($node, $page),
 				$this->nodeTypeManager->getNodeType('TYPO3.Neos.NodeTypes:Page')
 			);
-		} else {
-			// reuse the page, purge old data if requested
-			if ($purge) {
-				$this->purge($testNode);
-				$documentGenerator->clearState();
-			}
+			/** @var NodeInterface $node */
+			$node->setProperty('title', $page);
 		}
 
 		$this->outputLine('Nodecruncher in action, creating %d documents using batch size of %d',
@@ -92,7 +113,7 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 		if ($verbose) $this->reportMemoryUsage();
 
 		$this->output->progressStart($count);
-		$path = $testNode->getPath();
+		$path = $node->getPath();
 
 		for ($i=0;$i<$count;$i++) {
 
@@ -116,7 +137,7 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 * @return void
 	 */
 	public function purgeCommand() {
-		if ($testNode = $this->getTestNode()) $this->purge($testNode);
+		if ($testNode = $this->getTestsuiteFolderNode()) $this->purge($testNode);
 	}
 
 }
