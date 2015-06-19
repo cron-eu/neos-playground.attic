@@ -89,15 +89,9 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 */
 	public function createCommand($count, $batchSize, $page=false, $purge='', $verbose=false) {
 
-		/** @var DocumentGenerator $documentGenerator */
 		$documentGenerator = new DocumentGenerator();
-
 		$node = $this->getTestsuiteFolderNode(true);
-
-		if ($purge) {
-			$this->purge($node);
-		}
-
+		if ($purge) $this->purge($node);
 		if ($page) {
 			$node = $node->createNode(
 				$this->nodeNameGenerator->generateUniqueNodeName($node, $page),
@@ -116,18 +110,15 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$path = $node->getPath();
 
 		for ($i=0;$i<$count;$i++) {
-
 			if ($batchSize && $i && $i % $batchSize == 0) {
 				$documentGenerator->clearState();
 				if ($verbose) $this->reportMemoryUsage();
 			}
-
 			$documentGenerator->generateFakerPage($path, 10);
 			$this->output->progressAdvance();
-
 		}
-		$this->output->progressFinish();
 
+		$this->output->progressFinish();
 		$this->reportMemoryUsage();
 	}
 
