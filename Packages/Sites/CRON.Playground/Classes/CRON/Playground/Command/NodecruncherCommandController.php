@@ -36,16 +36,23 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 */
 	protected $nodeTypeManager;
 
-	/**
-	 * Inject PersistenceManagerInterface
-	 *
-	 * @Flow\Inject
-	 * @var \TYPO3\Flow\Persistence\PersistenceManagerInterface
-	 */
-	protected $persistenceManager;
-
 	private function reportMemoryUsage() {
 		$this->outputLine(' > mem: %.1f MB', [memory_get_peak_usage()/1024/1024]);
+	}
+
+	private function purge(NodeInterface $testNode) {
+		$this->outputLine('Deleting old stuff in %s..', [$testNode->getPath()]);
+		/** @var NodeInterface $childNode */
+		foreach ($testNode->getChildNodes('TYPO3.Neos:Document') as $childNode) {
+			// speedup things deleting the children using the nodeDataRepository first
+			$this->nodeDataRepository->removeAllInPath($childNode->getPath());
+			$childNode->remove();
+		}
+	}
+
+	private function getTestNode() {
+		$rootNode = $this->contextFactory->create()->getNode('/sites/playground');
+		return $rootNode->getNode(self::TEST_NODE_NAME);
 	}
 
 	/**
@@ -55,17 +62,16 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 *
 	 * @param int $count number of nodes to create
 	 * @param int $batchSize batch size after a clearState() will be performed
+	 * @param bool $purge purge old data
+	 * @param bool $verbose show memory usage after each iteration
 	 * @return void
 	 */
-	public function createCommand($count, $batchSize) {
-
-		$this->reportMemoryUsage();
+	public function createCommand($count, $batchSize, $purge=false, $verbose=false) {
 
 		/** @var DocumentGenerator $documentGenerator */
 		$documentGenerator = new DocumentGenerator();
 
-		$rootNode = $this->contextFactory->create()->getNode('/sites/playground');
-		$testNode = $rootNode->getNode(self::TEST_NODE_NAME);
+		$testNode = $this->getTestNode();
 
 		if (!$testNode) {
 			$testNode = $rootNode->createNode(
@@ -73,42 +79,44 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 				$this->nodeTypeManager->getNodeType('TYPO3.Neos.NodeTypes:Page')
 			);
 		} else {
-			// reuse the page, but purge old data..
-			/** @var NodeInterface $childNode */
-			$this->outputLine('Deleting old stuff..');
-			foreach ($testNode->getChildNodes('TYPO3.Neos:Document') as $childNode) {
-				$childNode->remove();
-				$this->persistenceManager->persistAll();
+			// reuse the page, purge old data if requested
+			if ($purge) {
+				$this->purge($testNode);
+				$documentGenerator->clearState();
 			}
 		}
 
 		$this->outputLine('Nodecruncher in action, creating %d documents using batch size of %d',
 			[$count, $batchSize]);
 
-		$this->reportMemoryUsage();
+		if ($verbose) $this->reportMemoryUsage();
 
 		$this->output->progressStart($count);
 		$path = $testNode->getPath();
 
-		$this->nodeTypeManager = null;
-		$this->contextFactory = null;
-
 		for ($i=0;$i<$count;$i++) {
 
-			if ($i % $batchSize == 0) {
-				$this->persistenceManager->persistAll();
-				$documentGenerator = null;
-				$this->persistenceManager->clearState();
-				$documentGenerator = new DocumentGenerator();
+			if ($batchSize && $i && $i % $batchSize == 0) {
+				$documentGenerator->clearState();
+				if ($verbose) $this->reportMemoryUsage();
 			}
 
 			$documentGenerator->generateFakerPage($path, 10);
 			$this->output->progressAdvance();
-			$this->reportMemoryUsage();
 
 		}
 		$this->output->progressFinish();
 
+		$this->reportMemoryUsage();
+	}
+
+	/**
+	 * Purge old data
+	 *
+	 * @return void
+	 */
+	public function purgeCommand() {
+		if ($testNode = $this->getTestNode()) $this->purge($testNode);
 	}
 
 }

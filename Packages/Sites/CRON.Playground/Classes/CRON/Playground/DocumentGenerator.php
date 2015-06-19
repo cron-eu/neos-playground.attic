@@ -17,12 +17,12 @@ use TYPO3\TYPO3CR\Domain\Service\NodeTypeManager;
 class DocumentGenerator  {
 
 	/**
-	 * @return void
+	 * Inject PersistenceManagerInterface
+	 *
+	 * @Flow\Inject
+	 * @var \TYPO3\Flow\Persistence\PersistenceManagerInterface
 	 */
-	public function initializeObject() {
-		$this->contextFactory->reset();
-		$this->context = $this->contextFactory->create();
-	}
+	protected $persistenceManager;
 
 	/**
 	 * @Flow\Inject
@@ -42,11 +42,25 @@ class DocumentGenerator  {
 	 */
 	protected $nodeTypeManager;
 
+	/**
+	 * @return void
+	 */
+	public function initializeObject() {
+		$this->context = $this->contextFactory->create();
+	}
+
 	private function tag($content, $tag = 'p') {
 		$xml = new \XMLWriter();
 		$xml->openMemory();
 		$xml->writeElement($tag, $content);
 		return $xml->outputMemory();
+	}
+
+	public function clearState() {
+		$this->persistenceManager->persistAll();
+		$this->persistenceManager->clearState();
+		$this->contextFactory->reset();
+		$this->initializeObject();
 	}
 
 	/**
