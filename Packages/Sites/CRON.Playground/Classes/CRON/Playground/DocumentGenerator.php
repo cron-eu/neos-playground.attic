@@ -9,12 +9,27 @@ namespace CRON\Playground;
  */
 
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Validation\ValidatorResolver;
+use TYPO3\TYPO3CR\Domain\Factory\NodeFactory;
+use TYPO3\TYPO3CR\Domain\Service\Context;
 use TYPO3\TYPO3CR\Domain\Service\NodeTypeManager;
 
 /**
  * @property \TYPO3\TYPO3CR\Domain\Service\Context context
  */
 class DocumentGenerator  {
+
+	/**
+	 * @Flow\Inject
+	 * @var \TYPO3\TYPO3CR\Domain\Repository\NodeDataRepository
+	 */
+	protected $nodeDataRepository;
+
+	/**
+	 * @Flow\Inject
+	 * @var ValidatorResolver
+	 */
+	protected $validatorResolver;
 
 	/**
 	 * Inject PersistenceManagerInterface
@@ -30,6 +45,11 @@ class DocumentGenerator  {
 	 */
 	protected $nodeNameGenerator;
 
+	/**
+	 * @Flow\Inject
+	 * @var NodeFactory
+	 */
+	protected $nodeFactory;
 	/**
 	 * @Flow\Inject
 	 * @var \TYPO3\TYPO3CR\Domain\Service\ContextFactoryInterface
@@ -58,8 +78,16 @@ class DocumentGenerator  {
 
 	public function clearState() {
 		$this->persistenceManager->persistAll();
-		$this->persistenceManager->clearState();
+		$this->validatorResolver->reset();
+		$this->nodeDataRepository->flushNodeRegistry();
+		$this->context = NULL;
+		/** @var Context $context */
+		foreach ($this->contextFactory->getInstances() as $context) {
+			$context->getFirstLevelNodeCache()->flush();
+		}
 		$this->contextFactory->reset();
+		$this->nodeFactory->reset();
+		$this->persistenceManager->clearState();
 		$this->initializeObject();
 	}
 
