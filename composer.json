@@ -13,11 +13,18 @@
         "vendor-dir": "Packages/Libraries",
         "bin-dir": "bin"
     },
+	"repositories": [
+		{
+			"type": "git",
+			"url": "git@github.com:cron-eu/neos-crlib.git"
+		}
+	],
     "require": {
 		"typo3/neos": "~2.0@beta",
 		"doctrine/migrations": "dev-master",
         "typo3/neos-kickstarter": "~2.0@beta",
-		"typo3/faker": "dev-master"
+		"typo3/faker": "dev-master",
+        "cron/neos-crlib": "dev-master"
 	},
 	"minimum-stability": "beta",
 	"prefer-stable": true,
