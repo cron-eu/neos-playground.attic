@@ -6,6 +6,7 @@ namespace CRON\Playground\Command;
  *                                                                        *
  *                                                                        */
 
+use CRON\CRLib\Utility\NodeIterator;
 use CRON\Playground\DocumentGenerator;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\TYPO3CR\Domain\Model\NodeInterface;
@@ -41,6 +42,36 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 * @var NodeTypeManager
 	 */
 	protected $nodeTypeManager;
+
+	/**
+	 * @Flow\Inject
+	 * @var \CRON\CRLib\Service\NodeQueryService
+	 */
+	protected $nodeQueryService;
+
+
+	public function getAllNodesCommand() {
+		$query = $this->nodeQueryService->findQuery();
+		$iterator = new NodeIterator($query);
+		$time = microtime(true);
+		$count = 0;
+		$md5 = '';
+		$batchSize = 10000;
+		foreach ($iterator as $node) {
+			// do some pseudo calculations to unwrap the objects (and don't let the PHP optimizer to
+			// mess up our benchmark
+			$md5 = md5($md5 . $node->getProperty('title'));
+
+			if ($iterator->key() % $batchSize === 0) {
+				$this->reportMemoryUsage();
+				$oldTime = $time; $time = microtime(true);
+				$seconds = $time - $oldTime;
+				if ($count) $this->outputLine('%.1f records/s', [(float)$batchSize/$seconds]);
+			}
+			$count++;
+		}
+		$this->outputLine('%d records processed, md5: %s', [$count, $md5]);
+	}
 
 	private function reportMemoryUsage() {
 		$this->outputLine(' > mem: %.1f MB', [memory_get_peak_usage()/1024/1024]);
