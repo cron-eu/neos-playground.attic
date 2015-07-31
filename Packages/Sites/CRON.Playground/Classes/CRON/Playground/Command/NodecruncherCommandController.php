@@ -135,13 +135,14 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 * This command creates a quite large number of nodes, trying to trigger a Doctrine Timeout
 	 *
 	 * @param int $count number of nodes to create
-	 * @param int $batchSize batch size after a clearState() will be performed
+	 * @param int $batchSize batch size after a clearState() will be performed (defaults to 20)
+	 * @param int $mainCount how many Text elements should be created in the main ContentCollection (defaults to 10)
 	 * @param string $page put generated pages in a page with this title
 	 * @param bool $purge purge old data
 	 * @param bool $verbose show memory usage after each iteration
 	 * @return void
 	 */
-	public function createCommand($count, $batchSize, $page=false, $purge='', $verbose=false) {
+	public function createCommand($count, $batchSize=20, $mainCount=10, $page=false, $purge='', $verbose=false) {
 
 		$documentGenerator = new DocumentGenerator();
 		$node = $this->getTestsuiteFolderNode(true);
@@ -168,7 +169,7 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 				$documentGenerator->clearState();
 				if ($verbose) $this->reportMemoryUsage();
 			}
-			$documentGenerator->generateFakerPage($path, 10);
+			$documentGenerator->generateFakerPage($path, $mainCount);
 			$this->output->progressAdvance();
 		}
 
