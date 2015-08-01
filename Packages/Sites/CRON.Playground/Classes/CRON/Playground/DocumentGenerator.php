@@ -95,7 +95,7 @@ class DocumentGenerator  {
 	 * Generates a NEOS Page with some random Faker Content
 	 *
 	 * @param string $path
-	 * @param int $count
+	 * @param int $count how many NodeTypes:Text nodes should be created per page
 	 * @return \TYPO3\TYPO3CR\Domain\Model\NodeInterface
 	 * @throws \TYPO3\TYPO3CR\Exception\NodeTypeNotFoundException
 	 */
