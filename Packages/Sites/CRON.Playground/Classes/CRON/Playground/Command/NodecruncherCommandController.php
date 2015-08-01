@@ -7,6 +7,7 @@ namespace CRON\Playground\Command;
  *                                                                        */
 
 use CRON\CRLib\Utility\NodeIterator;
+use CRON\CRLib\Utility\NodeQuery;
 use CRON\Playground\DocumentGenerator;
 use Doctrine\ORM\Query;
 use TYPO3\Flow\Annotations as Flow;
@@ -44,23 +45,15 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 */
 	protected $nodeTypeManager;
 
-	/**
-	 * @Flow\Inject
-	 * @var \CRON\CRLib\Service\NodeQueryService
-	 */
-	protected $nodeQueryService;
-
 	public function nodedataBenchmarkCommand() {
-		$query = $this->nodeQueryService->findQuery();
-		$iterator = $query->iterate(null, Query::HYDRATE_SCALAR);
+		$nodeQuery = new NodeQuery();
+		$iterator = new NodeIterator($nodeQuery->getQuery());
 
 		$time = microtime(true);
 		$count = 0;
 		$md5 = '';
 		$batchSize = 10000;
-		$em = $query->getEntityManager();
 		foreach ($iterator as $row) {
-			//$em->detach($row[0]);
 			if ($iterator->key() % $batchSize === 0) {
 				$this->reportMemoryUsage();
 				$oldTime = $time; $time = microtime(true);
@@ -74,7 +67,7 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	}
 
 	public function getAllNodesCommand() {
-		$query = $this->nodeQueryService->findQuery();
+		$query = (new NodeQuery())->getQuery();
 		$iterator = new NodeIterator($query);
 		$time = microtime(true);
 		$count = 0;
