@@ -29,6 +29,7 @@
 		"doctrine/migrations": "dev-master",
 		"typo3/party": "dev-master",
 		"typo3/faker": "dev-master",
+		"typo3/setup": "dev-master",
         "cron/neos-crlib": "dev-master"
 	},
 	"minimum-stability": "beta",
