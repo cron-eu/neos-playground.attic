@@ -17,12 +17,16 @@
 		{
 			"type": "git",
 			"url": "git@github.com:cron-eu/neos-crlib.git"
+		},
+		{
+			"type": "git",
+			"url": "git@github.com:cron-eu/neos-development-collection.git"
 		}
 	],
     "require": {
-		"typo3/neos": "~2.0@beta",
+		"neos/neos-development-collection": "dev-master",
+		"neos/flow-development-collection": "dev-master",
 		"doctrine/migrations": "dev-master",
-        "typo3/neos-kickstarter": "~2.0@beta",
 		"typo3/faker": "dev-master",
         "cron/neos-crlib": "dev-master"
 	},
