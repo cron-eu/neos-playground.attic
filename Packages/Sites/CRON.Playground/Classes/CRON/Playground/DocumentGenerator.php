@@ -41,9 +41,9 @@ class DocumentGenerator  {
 
 	/**
 	 * @Flow\Inject
-	 * @var \TYPO3\Neos\Service\NodeNameGenerator
+	 * @var \TYPO3\TYPO3CR\Domain\Service\NodeService
 	 */
-	protected $nodeNameGenerator;
+	protected $nodeService;
 
 	/**
 	 * @Flow\Inject
@@ -105,7 +105,7 @@ class DocumentGenerator  {
 
 		$title = \TYPO3\Faker\Lorem::sentence(2);
 		$node = $node->createNode(
-			$this->nodeNameGenerator->generateUniqueNodeName($node, $title),
+			$this->nodeService->generateUniqueNodeName($node->getPath(), $title),
 			$this->nodeTypeManager->getNodeType('TYPO3.Neos.NodeTypes:Page')
 		);
 		$node->setProperty('title', $title);
@@ -116,7 +116,7 @@ class DocumentGenerator  {
 		for ($i=0;$i<$count;$i++) {
 			$title = \TYPO3\Faker\Lorem::sentence();
 			$textNode = $mainNode->createNode(
-				$this->nodeNameGenerator->generateUniqueNodeName($node, $title),
+				$this->nodeService->generateUniqueNodeName($node->getPath(), $title),
 				$this->nodeTypeManager->getNodeType('TYPO3.Neos.NodeTypes:Text')
 			);
 			$textNode->setProperty('title', $title);

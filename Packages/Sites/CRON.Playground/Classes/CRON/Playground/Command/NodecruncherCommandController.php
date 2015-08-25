@@ -23,12 +23,6 @@ class NodecruncherCommandController extends \TYPO3\Flow\Cli\CommandController {
 
 	/**
 	 * @Flow\Inject
-	 * @var \TYPO3\Neos\Service\NodeNameGenerator
-	 */
-	protected $nodeNameGenerator;
-
-	/**
-	 * @Flow\Inject
 	 * @var \TYPO3\TYPO3CR\Domain\Repository\NodeDataRepository
 	 */
 	protected $nodeDataRepository;
