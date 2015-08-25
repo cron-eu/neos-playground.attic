@@ -24,9 +24,10 @@
 		}
 	],
     "require": {
-		"neos/neos-development-collection": "dev-master",
+		"neos/neos-development-collection": "dev-develop",
 		"neos/flow-development-collection": "dev-master",
 		"doctrine/migrations": "dev-master",
+		"typo3/party": "dev-master",
 		"typo3/faker": "dev-master",
         "cron/neos-crlib": "dev-master"
 	},
